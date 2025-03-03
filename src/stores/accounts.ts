@@ -3,15 +3,17 @@ import { ref } from "vue";
 import type { IAccount } from "../types";
 
 export const useAccountsStore = defineStore("accounts", () => {
-    const accounts = ref<IAccount[]>([]);
+    const accounts = ref<IAccount[]>([{ id: 1, login: "login", password: "2312312", type: "Local", mark: "mark" }]);
 
-    const addAccount = (account: Omit<IAccount, "id">) => {
-        const newAccount: IAccount = { id: Date.now(), ...account };
+    const createNewAccount = () => {
+        const newAccount: IAccount = {
+            id: Date.now(),
+            login: "",
+            password: "",
+            type: "Local",
+            mark: ""
+        };
         accounts.value.push(newAccount);
-    };
-
-    const getAccountById = (id: number): IAccount | undefined => {
-        return accounts.value.find((acc) => acc.id === id);
     };
 
     const updateAccount = (id: number, updatedData: Partial<IAccount>) => {
@@ -23,16 +25,12 @@ export const useAccountsStore = defineStore("accounts", () => {
 
     const deleteAccount = (id: number) => {
         accounts.value = accounts.value.filter((acc) => acc.id !== id);
-    };
-
-    const validateAccount = (account: IAccount): Boolean => {
-        return true;
+        console.log(accounts.value);
     };
 
     return {
         accounts,
-        addAccount,
-        getAccountById,
+        createNewAccount,
         updateAccount,
         deleteAccount
     };

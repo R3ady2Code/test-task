@@ -1,83 +1,58 @@
 <template>
     <div class="account-item">
-        <div class="input-group">
-            <label>Метка</label>
-            <input v-model="account.label" type="text" placeholder="Введите метку" @blur="validateAccount(index)" />
-        </div>
-
-        <div class="input-group">
-            <label>Тип записи</label>
-            <select v-model="account.recordType" @change="validateAccount(index)">
-                <option value="LDAP">LDAP</option>
-                <option value="Local">Локальная</option>
-            </select>
-        </div>
-
-        <div class="input-group">
-            <label>Логин</label>
-            <input
-                v-model="account.login"
-                type="text"
-                placeholder="Введите логин"
-                @blur="validateAccount(index)"
-                :class="{ invalid: !account.login && account.loginTouched }"
-            />
-        </div>
-
-        <div v-if="account.recordType === 'Local'" class="input-group">
-            <label>Пароль</label>
-            <input
-                v-model="account.password"
-                type="password"
-                placeholder="Введите пароль"
-                @blur="validateAccount(index)"
-                :class="{ invalid: !account.password && account.passwordTouched }"
-            />
-        </div>
-
-        <button @click="removeAccount(index)">Удалить</button>
+        <Input v-model="account.mark" label="Метка" placeholder="Введите метку" @update:modelValue="update" />
+        <Select v-model="account.type" label="Тип записи" :options="['LDAP', 'Local']" @update:modelValue="update" />
+        <Input
+            v-model="account.login"
+            label="Логин"
+            placeholder="Введите логин"
+            :invalid="!account.login && account.loginTouched"
+            :touched="account.loginTouched"
+            @update:modelValue="update"
+        />
+        <Input
+            v-if="account.type === 'Local'"
+            v-model="account.password"
+            label="Пароль"
+            type="password"
+            placeholder="Введите пароль"
+            :invalid="!account.password && account.passwordTouched"
+            :touched="account.passwordTouched"
+            @update:modelValue="update"
+        />
+        <button @click="removeAccount">Удалить</button>
     </div>
-    ;
 </template>
 
-<script>
-import { defineComponent, ref } from "vue";
-import { useAccountsStore, Account } from "@/stores/useAccountsStore";
+<script setup lang="ts">
+import { watch, ref } from "vue";
+import { useAccountsStore } from "../../stores/accounts";
+import Input from "../UI/Input.vue";
+import Select from "../UI/Select.vue";
+import type { IAccount } from "../../types.ts";
 
-export default defineComponent({
-    setup() {
-        const accountsStore = useAccountsStore();
-        const accounts = ref(accountsStore.accounts);
+const props = defineProps<{
+    account: IAccount;
+}>();
 
-        const removeAccount = (id: number) => {
-            accountsStore.removeAccount(index);
-        };
+const accountsStore = useAccountsStore();
 
-        const validateAccount = (id: number) => {
-            const account = accounts.value[index];
+const passwordTouched: boolean = ref(false);
+const loginTouched: boolean = ref(false);
 
-            account.loginTouched = true;
-            account.passwordTouched = true;
+const update = () => {
+    accountsStore.updateAccount(props.account);
+};
 
-            if (account.recordType === "Local" && !account.password) {
-                account.passwordTouched = false;
-            }
+const removeAccount = () => {
+    accountsStore.deleteAccount(props.account.id);
+};
 
-            if (!account.login) {
-                account.loginTouched = false;
-            }
-
-            if (account.login && (account.recordType === "LDAP" || account.password)) {
-                accountsStore.updateAccount(index, { ...account });
-            }
-        };
-
-        return {
-            accounts,
-            addAccount,
-            removeAccount,
-            validateAccount
-        };
-    }
-});
+watch(
+    () => props.account,
+    () => {
+        accountsStore.updateAccount(props.account);
+    },
+    { deep: true }
+);
 </script>
