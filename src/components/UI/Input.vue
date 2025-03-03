@@ -7,7 +7,7 @@
             :placeholder="placeholder"
             @input="updateValue"
             @blur="handleBlur"
-            :class="{ invalid: invalid && touched }"
+            :class="{ invalid: !modelValue && touched }"
         />
     </div>
 </template>
@@ -16,12 +16,11 @@
 import { ref, watch } from "vue";
 
 const props = defineProps<{
-    modelValue: { type: String; required: true };
-    label: { type: String; required: true };
-    placeholder: { type: String; required: true };
-    type: { type: String; default: "text" };
-    touched: { type: Boolean; default: false };
-    invalid: { type: Boolean; default: false };
+    modelValue: string;
+    label: string;
+    placeholder: string;
+    type: string;
+    touched?: boolean | undefined;
 }>();
 const emit = defineEmits(["update:modelValue"]);
 

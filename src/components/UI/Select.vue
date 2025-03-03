@@ -13,18 +13,9 @@ import { onMounted } from "vue";
 const emit = defineEmits(["update:modelValue"]);
 
 const props = defineProps<{
-    modelValue: {
-        type: String;
-        required: true;
-    };
-    label: {
-        type: String;
-        required: true;
-    };
-    options: {
-        type: Array;
-        required: true;
-    };
+    modelValue: string;
+    label: string;
+    options: string[];
 }>();
 
 const emitUpdate = (value) => {

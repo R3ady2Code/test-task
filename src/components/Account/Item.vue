@@ -1,13 +1,19 @@
 <template>
     <div class="account-item">
-        <Input v-model="account.mark" label="Метка" placeholder="Введите метку" @update:modelValue="update" />
+        <Input
+            v-model="account.mark"
+            label="Метка"
+            placeholder="Введите метку"
+            @update:modelValue="update"
+            type="text"
+        />
         <Select v-model="account.type" label="Тип записи" :options="['LDAP', 'Local']" @update:modelValue="update" />
         <Input
             v-model="account.login"
             label="Логин"
+            type="text"
             placeholder="Введите логин"
-            :invalid="!account.login && account.loginTouched"
-            :touched="account.loginTouched"
+            :touched="touched.login"
             @update:modelValue="update"
         />
         <Input
@@ -16,8 +22,7 @@
             label="Пароль"
             type="password"
             placeholder="Введите пароль"
-            :invalid="!account.password && account.passwordTouched"
-            :touched="account.passwordTouched"
+            :touched="touched.password"
             @update:modelValue="update"
         />
         <button @click="removeAccount">Удалить</button>
@@ -37,8 +42,7 @@ const props = defineProps<{
 
 const accountsStore = useAccountsStore();
 
-const passwordTouched: boolean = ref(false);
-const loginTouched: boolean = ref(false);
+const touched: boolean = ref({ login: false, password: false });
 
 const update = () => {
     accountsStore.updateAccount(props.account);
