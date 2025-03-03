@@ -8,6 +8,20 @@ const { createNewAccount } = useAccountsStore();
 </script>
 
 <template>
-    <button @click="createNewAccount">+</button>
-    <AccountList />
+    <div class="container mx-auto p-6 space-y-4">
+        <button
+            @click="createNewAccount"
+            class="w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center text-2xl hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        >
+            +
+        </button>
+
+        <AccountList />
+    </div>
 </template>
+
+<style scoped>
+.container {
+    max-width: 1200px;
+}
+</style>

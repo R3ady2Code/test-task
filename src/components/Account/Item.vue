@@ -1,5 +1,5 @@
 <template>
-    <div class="account-item">
+    <div class="account-item flex items-end gap-4 p-6 bg-white rounded-lg shadow-lg">
         <Input
             v-model="account.mark"
             label="Метка"
@@ -25,7 +25,9 @@
             :touched="touched.password"
             @update:modelValue="update"
         />
-        <button @click="removeAccount">Удалить</button>
+        <button class="bg-red-500 text-white p-3 rounded-lg hover:bg-red-600 ml-auto" @click="removeAccount">
+            Удалить
+        </button>
     </div>
 </template>
 
