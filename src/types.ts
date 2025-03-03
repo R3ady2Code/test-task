@@ -3,5 +3,5 @@ export interface IAccount {
     type: "LDAP" | "Local";
     login: string;
     password: string | null;
-    mark?: string;
+    mark?: { text: string }[];
 }

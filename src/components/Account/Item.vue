@@ -1,12 +1,12 @@
 <template>
     <div class="account-item flex items-end gap-4 p-6 bg-white rounded-lg shadow-lg">
         <Input
-            v-model="account.mark"
+            v-model="markValue"
             label="Метка"
             type="text"
             placeholder="Введите метку"
+            @update:modelValue="updateMark"
             :error="v$.mark.$error"
-            @update:modelValue="update"
             @blur="v$.mark.$touch()"
         />
         <Select v-model="account.type" label="Тип записи" :options="['LDAP', 'Local']" @update:modelValue="update" />
@@ -51,23 +51,32 @@ const { account } = defineProps<{
 
 const accountsStore = useAccountsStore();
 
+const markValue = ref(account.mark.map((item) => item.text).join(";"));
+
 const rules = computed(() => ({
     password: account.type === "Local" ? { required, maxLength: maxLength(50) } : {},
     login: { required, maxLength: maxLength(50) },
     mark: { maxLength: maxLength(50) }
 }));
 
-const v$ = useVuelidate(rules, account);
+const v$ = useVuelidate(rules, { ...account, mark: markValue });
 
 const update = () => {
     if (!v$.$error) accountsStore.updateAccount(account);
 };
 
+const updateMark = () => {
+    if (!v$.$error) {
+        const formatMark = markValue.value.split(";").map((item) => ({
+            text: item
+        }));
+        accountsStore.updateAccount({ ...account, mark: formatMark });
+    }
+};
+
 const removeAccount = () => {
     accountsStore.deleteAccount(account.id);
 };
-
-const handleBlur = () => {};
 
 watch(
     () => account,

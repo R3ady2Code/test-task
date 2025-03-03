@@ -3,7 +3,9 @@ import { ref } from "vue";
 import type { IAccount } from "../types";
 
 export const useAccountsStore = defineStore("accounts", () => {
-    const accounts = ref<IAccount[]>([{ id: 1, login: "login", password: "2312312", type: "Local", mark: "mark" }]);
+    const accounts = ref<IAccount[]>([
+        { id: 1, login: "login", password: "2312312", type: "Local", mark: [{ text: "mark" }] }
+    ]);
 
     const createNewAccount = () => {
         const newAccount: IAccount = {
@@ -11,13 +13,13 @@ export const useAccountsStore = defineStore("accounts", () => {
             login: "",
             password: "",
             type: "Local",
-            mark: ""
+            mark: [{ text: "" }]
         };
         accounts.value.push(newAccount);
     };
 
-    const updateAccount = (id: number, updatedData: Partial<IAccount>) => {
-        const index = accounts.value.findIndex((acc) => acc.id === id);
+    const updateAccount = (updatedData: Partial<IAccount>) => {
+        const index = accounts.value.findIndex((acc) => acc.id === updatedData.id);
         if (index !== -1) {
             accounts.value[index] = { ...accounts.value[index], ...updatedData };
         }
