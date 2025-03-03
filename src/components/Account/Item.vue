@@ -3,9 +3,11 @@
         <Input
             v-model="account.mark"
             label="Метка"
-            placeholder="Введите метку"
-            @update:modelValue="update"
             type="text"
+            placeholder="Введите метку"
+            :error="v$.mark.$error"
+            @update:modelValue="update"
+            @blur="v$.mark.$touch()"
         />
         <Select v-model="account.type" label="Тип записи" :options="['LDAP', 'Local']" @update:modelValue="update" />
         <Input
@@ -13,8 +15,9 @@
             label="Логин"
             type="text"
             placeholder="Введите логин"
-            :touched="touched.login"
+            :error="v$.login.$error"
             @update:modelValue="update"
+            @blur="v$.login.$touch()"
         />
         <Input
             v-if="account.type === 'Local'"
@@ -22,8 +25,9 @@
             label="Пароль"
             type="password"
             placeholder="Введите пароль"
-            :touched="touched.password"
+            :error="v$.password.$error"
             @update:modelValue="update"
+            @blur="v$.password.$touch()"
         />
         <button class="bg-red-500 text-white p-3 rounded-lg hover:bg-red-600 ml-auto" @click="removeAccount">
             Удалить
@@ -32,32 +36,43 @@
 </template>
 
 <script setup lang="ts">
-import { watch, ref } from "vue";
+import { watch, ref, computed } from "vue";
 import { useAccountsStore } from "../../stores/accounts";
+import useVuelidate from "@vuelidate/core";
+import { required, maxLength } from "@vuelidate/validators";
+
 import Input from "../UI/Input.vue";
 import Select from "../UI/Select.vue";
 import type { IAccount } from "../../types.ts";
 
-const props = defineProps<{
+const { account } = defineProps<{
     account: IAccount;
 }>();
 
 const accountsStore = useAccountsStore();
 
-const touched: boolean = ref({ login: false, password: false });
+const rules = computed(() => ({
+    password: account.type === "Local" ? { required, maxLength: maxLength(50) } : {},
+    login: { required, maxLength: maxLength(50) },
+    mark: { maxLength: maxLength(50) }
+}));
+
+const v$ = useVuelidate(rules, account);
 
 const update = () => {
-    accountsStore.updateAccount(props.account);
+    if (!v$.$error) accountsStore.updateAccount(account);
 };
 
 const removeAccount = () => {
-    accountsStore.deleteAccount(props.account.id);
+    accountsStore.deleteAccount(account.id);
 };
 
+const handleBlur = () => {};
+
 watch(
-    () => props.account,
+    () => account,
     () => {
-        accountsStore.updateAccount(props.account);
+        update;
     },
     { deep: true }
 );
