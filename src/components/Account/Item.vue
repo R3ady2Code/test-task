@@ -1,33 +1,35 @@
 <template>
     <div class="account-item flex items-end gap-4 p-6 bg-white rounded-lg shadow-lg">
         <Input
-            v-model="markValue"
+            v-model="accountValues.mark"
             label="Метка"
             type="text"
             placeholder="Введите метку"
-            @update:modelValue="updateMark"
             :error="v$.mark.$error"
-            @blur="v$.mark.$touch()"
+            @blur="update('mark')"
         />
-        <Select v-model="account.type" label="Тип записи" :options="['LDAP', 'Local']" @update:modelValue="update" />
+        <Select
+            v-model="accountValues.type"
+            label="Тип записи"
+            :options="['LDAP', 'Local']"
+            @update:modelValue="update('type')"
+        />
         <Input
-            v-model="account.login"
+            v-model="accountValues.login"
             label="Логин"
             type="text"
             placeholder="Введите логин"
             :error="v$.login.$error"
-            @update:modelValue="update"
-            @blur="v$.login.$touch()"
+            @blur="update('login')"
         />
         <Input
-            v-if="account.type === 'Local'"
-            v-model="account.password"
+            v-if="accountValues.type === 'Local'"
+            v-model="accountValues.password"
             label="Пароль"
             type="password"
             placeholder="Введите пароль"
             :error="v$.password.$error"
-            @update:modelValue="update"
-            @blur="v$.password.$touch()"
+            @blur="update('password')"
         />
         <button class="bg-red-500 text-white p-3 rounded-lg hover:bg-red-600 ml-auto" @click="removeAccount">
             Удалить
@@ -36,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { watch, ref, computed } from "vue";
+import { computed, reactive } from "vue";
 import { useAccountsStore } from "../../stores/accounts";
 import useVuelidate from "@vuelidate/core";
 import { required, maxLength } from "@vuelidate/validators";
@@ -51,38 +53,38 @@ const { account } = defineProps<{
 
 const accountsStore = useAccountsStore();
 
-const markValue = ref(account.mark.map((item) => item.text).join(";"));
+const accountValues = reactive({
+    id: account.id,
+    login: account.login,
+    password: account.password || "",
+    mark: account.mark ? account.mark.map((item) => item.text).join(";") : "",
+    type: account.type
+});
+
+const markFormatter = (mark: string): { text: string }[] => mark.split(";").map((item) => ({ text: item }));
 
 const rules = computed(() => ({
-    password: account.type === "Local" ? { required, maxLength: maxLength(50) } : {},
+    password: accountValues.type === "Local" ? { required, maxLength: maxLength(50) } : {},
     login: { required, maxLength: maxLength(50) },
-    mark: { maxLength: maxLength(50) }
+    mark: { maxLength: maxLength(50) },
+    type: { required }
 }));
 
-const v$ = useVuelidate(rules, { ...account, mark: markValue });
+const v$ = useVuelidate(rules, accountValues);
 
-const update = () => {
-    if (!v$.$error) accountsStore.updateAccount(account);
-};
-
-const updateMark = () => {
-    if (!v$.$error) {
-        const formatMark = markValue.value.split(";").map((item) => ({
-            text: item
-        }));
-        accountsStore.updateAccount({ ...account, mark: formatMark });
+const update = (property: string) => {
+    v$.value[property].$touch();
+    if (!v$.value.$invalid) {
+        const newAccount = {
+            ...accountValues,
+            password: accountValues.type === "Local" ? accountValues.password : null,
+            mark: markFormatter(accountValues.mark)
+        };
+        accountsStore.updateAccount(newAccount);
     }
 };
 
 const removeAccount = () => {
     accountsStore.deleteAccount(account.id);
 };
-
-watch(
-    () => account,
-    () => {
-        update;
-    },
-    { deep: true }
-);
 </script>

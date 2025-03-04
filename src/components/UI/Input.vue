@@ -27,9 +27,7 @@ const props = defineProps<{
     type: string;
     error?: boolean | undefined;
 }>();
-const emit = defineEmits(["update:modelValue"]);
-
-const touched = ref(props.touched);
+const emit = defineEmits(["update:modelValue", "blur"]);
 
 const updateValue = (event: Event) => {
     const target = event.target as HTMLInputElement;

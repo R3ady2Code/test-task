@@ -27,7 +27,6 @@ export const useAccountsStore = defineStore("accounts", () => {
 
     const deleteAccount = (id: number) => {
         accounts.value = accounts.value.filter((acc) => acc.id !== id);
-        console.log(accounts.value);
     };
 
     return {
